@@ -8,7 +8,7 @@ export interface Slot<T> {
 const { freeze } = Object;
 let subtextCount = 0;
 
-export class Subtext extends null {
+export class Subtext {
   private parents: Subtext[];
 
   // Maintain a global ordering of Subtext objects by creation time,
@@ -135,6 +135,16 @@ export class Subtext extends null {
   }
 }
 
+// Deno's TypeScript compiler complains if Subtext extends null, throwing
+// "ReferenceError: Must call super constructor in derived class before
+// accessing 'this' or returning from derived constructor" even though calling
+// super() in the constructor is forbidden for classes that extend null.
+// Fortunately, we can achieve the same effect by changing Subtext.prototype's
+// own prototype to null here, then freeze it to prevent further modification.
+// Thanks to this Object.setPrototypeOf trick, it's as if Subtext.prototype was
+// created using Object.create(null), so it won't be vulnerable to inheriting
+// properties added to Object.prototype, like a "normal" {} object would.
+Object.setPrototypeOf(Subtext.prototype, null);
 freeze(Subtext.prototype);
 
 // This live binding changes every time a new function is run by
