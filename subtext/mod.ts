@@ -42,6 +42,8 @@ export class Subtext extends null {
       map.set(
         slot,
         values.length
+          // If this slot defines a merge function, use it to resolve any merge
+          // conflicts. Otherwise, always prefer the last (right-most) value.
           ? slot.merge ? values.reduce(slot.merge) : values.pop()!
           : MISSING,
       );
