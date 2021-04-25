@@ -29,7 +29,7 @@ export class Subtext extends null {
     if (value !== MISSING) return value;
   }
 
-  private find<T>(slot: Slot<T>): T | typeof MISSING {
+  private find<T>(slot: Slot<T>): T | (typeof MISSING) {
     const map = SlotMap.for(this);
     if (!map.has(slot)) {
       const values: T[] = [];
