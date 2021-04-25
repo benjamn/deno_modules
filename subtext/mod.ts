@@ -1,7 +1,6 @@
-import { MISSING, SlotMap, newWeakMap } from './_slotMap.ts';
+import { MISSING, KeyMap, newWeakMap } from "./_keyMap.ts";
 
-export interface Slot<T> {
-  key?: any; // TODO
+export interface Key<T> {
   merge?: (left: T, right: T) => T;
 }
 
@@ -20,39 +19,39 @@ export class Subtext {
     freeze(this);
   }
 
-  public has<T>(slot: Slot<T>): boolean {
-    return this.find(slot) !== MISSING;
+  public has<T>(key: Key<T>): boolean {
+    return this.find(key) !== MISSING;
   }
 
-  public get<T>(slot: Slot<T>): T | undefined {
-    const value = this.find(slot);
+  public get<T>(key: Key<T>): T | undefined {
+    const value = this.find(key);
     if (value !== MISSING) return value;
   }
 
-  private find<T>(slot: Slot<T>): T | (typeof MISSING) {
-    const map = SlotMap.for(this);
-    if (!map.has(slot)) {
+  private find<T>(key: Key<T>): T | (typeof MISSING) {
+    const map = KeyMap.for(this);
+    if (!map.has(key)) {
       const values: T[] = [];
       this.parents.forEach(parent => {
-        const value = parent.find(slot);
+        const value = parent.find(key);
         if (value !== MISSING && values.indexOf(value) < 0) {
           values.push(value);
         }
       });
       map.set(
-        slot,
+        key,
         values.length
-          // If this slot defines a merge function, use it to resolve any merge
+          // If this key defines a merge function, use it to resolve any merge
           // conflicts. Otherwise, always prefer the last (right-most) value.
-          ? slot.merge ? values.reduce(slot.merge) : values.pop()!
+          ? key.merge ? values.reduce(key.merge) : values.pop()!
           : MISSING,
       );
     }
-    return map.get(slot);
+    return map.get(key);
   }
 
   // We could potentially allow Subtext.prototype.run to be monkey-patched
-  // for tracking purposes, since it is not sensitive (does not take a Slot).
+  // for tracking purposes, since it is not sensitive (does not take a Key).
   public run<TSelf, TArgs extends any[], TResult>(
     fn: (this: TSelf, ...args: TArgs) => TResult,
     args?: TArgs | IArguments,
@@ -76,22 +75,22 @@ export class Subtext {
     } as typeof fn;
   }
 
-  public branch(...slotValues: [Slot<any>, any][]): Subtext {
-    if (!slotValues.length) return this;
+  public branch(...keyValues: [Key<any>, any][]): Subtext {
+    if (!keyValues.length) return this;
     const branch = new Subtext(this);
-    const map = SlotMap.for(branch);
-    for (let i = 0; i < slotValues.length; ++i) {
-      const [slot, value] = slotValues[i];
-      map.set(slot, value);
+    const map = KeyMap.for(branch);
+    for (let i = 0; i < keyValues.length; ++i) {
+      const [key, value] = keyValues[i];
+      map.set(key, value);
     }
     return branch;
   }
 
-  public limit(...slots: Slot<any>[]): Subtext {
+  public limit(...keys: Key<any>[]): Subtext {
     const result = new Subtext;
-    if (slots.length) {
-      const map = SlotMap.for(result);
-      slots.forEach(slot => map.set(slot, this.get(slot)));
+    if (keys.length) {
+      const map = KeyMap.for(result);
+      keys.forEach(key => map.set(key, this.get(key)));
     }
     return result;
   }
