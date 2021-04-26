@@ -1,6 +1,9 @@
 import { KeyMap } from "./_keyMap.ts";
 import { MISSING, newWeakMap, setPrototypeOf } from "./_helpers.ts";
 
+// Any object reference can serve as a Key<T>, unlocking access to private
+// Subtext-tracked values of type T. A merge method may optionally be defined to
+// handle any merge conflicts upon attempting to read the conflicted value.
 export interface Key<T> {
   merge?: (left: T, right: T) => T;
 }
@@ -87,6 +90,11 @@ export class Subtext {
     return branch;
   }
 
+  // In case you need/want to run a function in a restricted context containing
+  // only a known subset of keys (for example, because those keys are ones your
+  // caching system is aware of, and you don't want the function depending on
+  // any other untracked contextual information). Calling subtext.limit()
+  // returns a completely empty Subtext.
   public limit(...keys: Key<any>[]): Subtext {
     const result = new Subtext;
     if (keys.length) {
@@ -103,8 +111,9 @@ export class Subtext {
     let merged = this.mergeCache.get(that);
     if (merged) return merged;
 
-    // If one context is an ancestor of the other, the descendant
-    // can be returned without creating a new Subtext.
+    // If one context is an ancestor of the other, the descendant can be
+    // returned as-is, without creating a new Subtext. This behavior is similar
+    // to a fast-forward merge in Git.
     if (this.tick < that.tick) {
       if (this.isAncestorOf(that)) {
         merged = that;
