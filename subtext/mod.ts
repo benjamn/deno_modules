@@ -121,10 +121,10 @@ export class Subtext {
   }
 
   private isAncestorOf(that: Subtext): boolean {
-    for (let i = 0, workQueue = [that]; i < workQueue.length; ++i) {
-      const subtext = workQueue[i];
+    const workSet = new Set([that]);
+    for (const subtext of workSet) {
       if (subtext === this) return true;
-      workQueue.push.apply(workQueue, subtext.parents);
+      subtext.parents.forEach(workSet.add, workSet);
     }
     return false;
   }
