@@ -11,6 +11,69 @@ Deno.test("Subtext and subtext", function () {
   assertStrictEquals(current, Subtext.current);
 });
 
+Deno.test("branching and merging", function () {
+  const key: Key<string> = {
+    merge(a, b) {
+      return `${a}:${b}`;
+    },
+  };
+
+  const asdfBranch = current.branch([key, "asdf"]);
+  const qwerBranch = current.branch([key, "qwer"]);
+
+  assertStrictEquals(
+    asdfBranch.merge(current),
+    asdfBranch,
+  );
+
+  assertStrictEquals(
+    qwerBranch.merge(current),
+    qwerBranch,
+  );
+
+  const asdfMergedWithQwer = asdfBranch.merge(qwerBranch);
+  const qwerMergedWithAsdf = qwerBranch.merge(asdfBranch);
+  assertNotStrictEquals(asdfMergedWithQwer, qwerMergedWithAsdf)
+
+  asdfMergedWithQwer.run(() => {
+    assertStrictEquals(current.get(key), "asdf:qwer");
+  });
+
+  qwerMergedWithAsdf.run(() => {
+    assertStrictEquals(current.get(key), "qwer:asdf");
+  });
+
+  assertStrictEquals(
+    qwerMergedWithAsdf.merge(qwerBranch),
+    qwerMergedWithAsdf,
+  );
+
+  assertStrictEquals(
+    qwerMergedWithAsdf.merge(asdfBranch),
+    qwerMergedWithAsdf,
+  );
+
+  assertStrictEquals(
+    asdfMergedWithQwer.merge(qwerBranch),
+    asdfMergedWithQwer,
+  );
+
+  assertStrictEquals(
+    asdfMergedWithQwer.merge(asdfBranch),
+    asdfMergedWithQwer,
+  );
+
+  assertStrictEquals(
+    qwerMergedWithAsdf.merge(current),
+    qwerMergedWithAsdf,
+  );
+
+  assertStrictEquals(
+    asdfMergedWithQwer.merge(current),
+    asdfMergedWithQwer,
+  );
+});
+
 Deno.test("live binding of current export", function () {
   const key: Key<number> = {};
   const before = current;
