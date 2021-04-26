@@ -1,4 +1,5 @@
-import { MISSING, KeyMap, newWeakMap } from "./_keyMap.ts";
+import { KeyMap } from "./_keyMap.ts";
+import { MISSING, newWeakMap, setPrototypeOf } from "./_helpers.ts";
 
 export interface Key<T> {
   merge?: (left: T, right: T) => T;
@@ -159,7 +160,7 @@ export class Subtext {
 // Thanks to this Object.setPrototypeOf trick, it's as if Subtext.prototype was
 // created using Object.create(null), so it won't be vulnerable to inheriting
 // properties added to Object.prototype, like a "normal" {} object would.
-Object.setPrototypeOf(Subtext.prototype, null);
+setPrototypeOf(Subtext.prototype, null);
 freeze(Subtext.prototype);
 
 // While most ECMAScript live bindings remain relatively unchanged after their

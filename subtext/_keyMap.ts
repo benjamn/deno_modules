@@ -1,20 +1,5 @@
 import { Subtext, Key } from "./mod.ts";
-
-export const MISSING: unique symbol = Symbol();
-
-const { assign } = Object;
-
-const safeWeakMapMethods = {
-  has: WeakMap.prototype.has,
-  get: WeakMap.prototype.get,
-  set: WeakMap.prototype.set,
-};
-
-export function newWeakMap<Key extends object, Value>():
-  Pick<WeakMap<Key, Value>, "has" | "get" | "set">
-{
-  return assign(new WeakMap, safeWeakMapMethods);
-}
+import { MISSING, newWeakMap } from "./_helpers.ts";
 
 const keyMapsBySubtext = newWeakMap<Subtext, KeyMap>();
 
