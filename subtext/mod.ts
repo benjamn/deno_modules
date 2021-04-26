@@ -146,6 +146,7 @@ export class Subtext {
 Object.setPrototypeOf(Subtext.prototype, null);
 freeze(Subtext.prototype);
 
-// This live binding changes every time a new function is run by
-// Subtext.prototype.run
+// While most ECMAScript live bindings remain relatively unchanged after their
+// first initialization, this live binding really deserves to be called "live,"
+// since it changes every time a function gets called by the subtext.run method.
 export let current = new Subtext;
