@@ -120,12 +120,28 @@ export class Subtext {
     return merged;
   }
 
+  private ancestorCache = new WeakMap<Subtext, boolean>();
   private isAncestorOf(that: Subtext): boolean {
+    if (this === that) return true;
+
+    const cached = that.ancestorCache.get(this);
+    if (typeof cached === "boolean") {
+      return cached;
+    }
+
     const workSet = new Set([that]);
     for (const subtext of workSet) {
-      if (subtext === this) return true;
+      that.ancestorCache.set(subtext, true);
+
+      if (subtext === this ||
+          subtext.ancestorCache.has(this)) {
+        return true;
+      }
+
       subtext.parents.forEach(workSet.add, workSet);
     }
+
+    that.ancestorCache.set(this, false);
     return false;
   }
 
