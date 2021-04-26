@@ -130,7 +130,7 @@ export class Subtext {
     return merged;
   }
 
-  private ancestorCache = new WeakMap<Subtext, boolean>();
+  private ancestorCache = newWeakMap<Subtext, boolean>();
   private isAncestorOf(that: Subtext): boolean {
     if (this === that) return true;
 
